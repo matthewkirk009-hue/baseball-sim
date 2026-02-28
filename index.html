@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Baseball Team Sim</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <h1>Baseball Team Sim (Website)</h1>
+
+    <div class="grid">
+      <section class="card">
+        <h2>1) Add Player</h2>
+
+        <label>Name</label>
+        <input id="name" placeholder="Scamp" />
+
+        <label>Photo (JPG/PNG)</label>
+        <input id="photo" type="file" accept="image/*" />
+
+        <div class="stats">
+          <div><label>HIT</label><input id="HIT" type="range" min="0" max="100" value="70"><span id="HITv">70</span></div>
+          <div><label>PWR</label><input id="PWR" type="range" min="0" max="100" value="50"><span id="PWRv">50</span></div>
+          <div><label>SPD</label><input id="SPD" type="range" min="0" max="100" value="60"><span id="SPDv">60</span></div>
+          <div><label>DEF</label><input id="DEF" type="range" min="0" max="100" value="60"><span id="DEFv">60</span></div>
+          <div><label>ARM</label><input id="ARM" type="range" min="0" max="100" value="55"><span id="ARMv">55</span></div>
+          <div><label>PIT (Pitchers)</label><input id="PIT" type="range" min="0" max="100" value="0"><span id="PITv">0</span></div>
+        </div>
+
+        <button id="addPlayer">Add Player</button>
+        <button id="clearRoster" class="danger">Clear Roster</button>
+      </section>
+
+      <section class="card">
+        <h2>2) Roster</h2>
+        <div id="roster"></div>
+      </section>
+
+      <section class="card wide">
+        <h2>3) Game</h2>
+        <div class="row">
+          <div>
+            <div id="score">Home 0 — 0 Away</div>
+            <div id="inning">Inning 1 (Top)</div>
+            <div id="outs">Outs 0</div>
+            <button id="nextPlay">Next Play</button>
+            <button id="simHalf">Sim Half-Inning</button>
+          </div>
+          <div class="highlight">
+            <img id="highlightImg" />
+            <div id="highlightText"></div>
+          </div>
+        </div>
+        <div id="log" class="log"></div>
+      </section>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
