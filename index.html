@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>⚾ Baseball Universe</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="toast" class="toast hidden"></div>
+
+<!-- ===== HEADER ===== -->
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-icon">⚾</div>
+    <div>
+      <div class="brand-name">Baseball Universe</div>
+      <div class="brand-tagline">Build your team · Draft legends · Play for glory</div>
+    </div>
+  </div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-tab="teams">🏟️ Teams</button>
+    <button class="nav-tab" data-tab="roster">📋 Roster</button>
+    <button class="nav-tab" data-tab="game">⚾ Game</button>
+    <button class="nav-tab" data-tab="league">🌎 League</button>
+    <button class="nav-tab" data-tab="stats">📊 Stats</button>
+  </nav>
+</header>
+
+<main class="main">
+
+  <!-- ===== TEAMS TAB ===== -->
+  <div class="tab-panel active" id="tab-teams">
+    <div class="two-col">
+
+      <!-- Left: My Teams Library -->
+      <div class="card">
+        <div class="card-header">
+          <h2>My Team Library</h2>
+          <span class="badge-count" id="teamCount">0 teams</span>
+        </div>
+
+        <div class="search-row">
+          <input class="search-input" id="teamSearch" placeholder="🔍 Search teams…" />
+          <select class="select-sm" id="sortTeams">
+            <option value="name">A–Z</option>
+            <option value="updated">Recent</option>
+            <option value="ovr">OVR ↓</option>
+          </select>
+        </div>
+
+        <div id="teamList" class="team-list"></div>
+
+        <div class="btn-row">
+          <button class="btn btn-ghost sm" id="btnDuplicateTeam">Duplicate</button>
+          <button class="btn btn-danger sm" id="btnDeleteTeam">Delete</button>
+          <button class="btn btn-ghost sm" id="btnExportTeam">Export</button>
+          <label class="btn btn-ghost sm">Import <input id="importTeamFile" type="file" accept=".json" hidden /></label>
+        </div>
+
+        <div class="tip-box">
+          <strong>Tip:</strong> Export teams as <code>.json</code> to back up or share. Import them back any time.
+        </div>
+      </div>
+
+      <!-- Right: Create / Edit Team -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Create / Edit Team</h2>
+          <button class="btn btn-primary sm" id="btnNewTeam">+ New Team</button>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group grow">
+            <label>Team Name</label>
+            <input id="teamName" placeholder="Thunder Hawks" />
+          </div>
+          <div class="form-group w200">
+            <label>City</label>
+            <input id="teamCity" placeholder="Riverside" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group grow">
+            <label>Stadium Name</label>
+            <input id="teamStadium" placeholder="Hawks Nest Arena" />
+          </div>
+          <div class="form-group w200">
+            <label>Home Field Advantage</label>
+            <select id="teamHomeAdv">
+              <option value="0">None</option>
+              <option value="2">Small (+2%)</option>
+              <option value="4">Medium (+4%)</option>
+              <option value="6">Big (+6%)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group grow">
+            <label>Team Logo</label>
+            <!-- Logo drop zone -->
+            <div class="drop-zone" id="logoDropZone">
+              <span id="logoDropLabel">Drag &amp; drop logo or click to browse</span>
+              <input id="teamLogo" type="file" accept="image/*" hidden />
+            </div>
+          </div>
+          <div class="form-group w220">
+            <label>Team Colors</label>
+            <div class="color-row">
+              <input id="teamColor1" type="color" value="#3b82f6" title="Primary" />
+              <input id="teamColor2" type="color" value="#22c55e" title="Secondary" />
+              <input id="teamColor3" type="color" value="#f59e0b" title="Accent" />
+              <span class="color-labels">Primary · Secondary · Accent</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group grow">
+            <label>Team Motto / Slogan (optional)</label>
+            <input id="teamMotto" placeholder="Fear the Thunder!" />
+          </div>
+          <div class="form-group w200">
+            <label>League / Division</label>
+            <input id="teamDivision" placeholder="East Division" />
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnSaveTeam">💾 Save Team</button>
+          <button class="btn btn-ghost" id="btnGoRoster">Edit Roster →</button>
+        </div>
+
+        <!-- Team Preview Card -->
+        <div class="team-preview" id="teamPreview">
+          <img id="teamLogoPreview" alt="" class="preview-logo" />
+          <div class="preview-info">
+            <div class="preview-name" id="previewName">No team selected</div>
+            <div class="preview-sub" id="previewSub">Create or pick a team to get started.</div>
+            <div class="preview-chips" id="previewChips"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== ROSTER TAB ===== -->
+  <div class="tab-panel" id="tab-roster">
+    <div class="two-col">
+
+      <!-- Left: Add Player Form -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Roster Builder</h2>
+          <select class="select-sm" id="activeTeamSelect"></select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group grow">
+            <label>Player Name</label>
+            <input id="playerName" placeholder="e.g. Rocketarm Rivera" />
+          </div>
+          <div class="form-group w180">
+            <label>Position</label>
+            <select id="playerPos">
+              <option value="DH">DH – Designated Hitter</option>
+              <option value="C">C – Catcher</option>
+              <option value="1B">1B – First Base</option>
+              <option value="2B">2B – Second Base</option>
+              <option value="3B">3B – Third Base</option>
+              <option value="SS">SS – Shortstop</option>
+              <option value="LF">LF – Left Field</option>
+              <option value="CF">CF – Center Field</option>
+              <option value="RF">RF – Right Field</option>
+              <option value="P">P – Pitcher</option>
+              <option value="RP">RP – Relief Pitcher</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Player image drop zone -->
+        <div class="form-group">
+          <label>Player Photo (JPG / PNG)</label>
+          <div class="drop-zone player-drop" id="playerDropZone">
+            <img id="playerDropPreview" class="drop-preview-img" alt="" />
+            <div id="playerDropLabel" class="drop-label">
+              <span class="drop-icon">📸</span>
+              <span>Drag &amp; drop photo or click to browse</span>
+              <span class="drop-sub">Square images work best</span>
+            </div>
+            <input id="playerPhoto" type="file" accept="image/*" hidden />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group grow">
+            <label>Quick Preset</label>
+            <select id="preset">
+              <option value="custom">Custom</option>
+              <option value="contact">Contact Hitter</option>
+              <option value="slugger">Slugger / Power Hitter</option>
+              <option value="speedster">Speedster</option>
+              <option value="glove">Gold Glove Fielder</option>
+              <option value="cannon">Cannon Arm</option>
+              <option value="ace">Pitching Ace</option>
+              <option value="reliever">Relief Pitcher</option>
+              <option value="utility">Utility Player</option>
+              <option value="rookie">Rookie (low stats)</option>
+              <option value="legend">Legend (high stats)</option>
+            </select>
+          </div>
+          <div class="form-group w180" style="display:flex;align-items:flex-end;gap:8px;">
+            <button class="btn btn-ghost sm" id="btnRandomStats">🎲 Random</button>
+            <button class="btn btn-ghost sm" id="btnMaxStats">🔥 Max</button>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-row"><label>HIT <em>Contact</em></label><input type="range" id="HIT" min="0" max="100" value="70" /><span id="HITv" class="stat-val">70</span><div class="stat-bar"><div class="stat-fill" id="HITbar" style="width:70%"></div></div></div>
+          <div class="stat-row"><label>PWR <em>Power</em></label><input type="range" id="PWR" min="0" max="100" value="50" /><span id="PWRv" class="stat-val">50</span><div class="stat-bar"><div class="stat-fill" id="PWRbar" style="width:50%"></div></div></div>
+          <div class="stat-row"><label>SPD <em>Speed</em></label><input type="range" id="SPD" min="0" max="100" value="60" /><span id="SPDv" class="stat-val">60</span><div class="stat-bar"><div class="stat-fill" id="SPDbar" style="width:60%"></div></div></div>
+          <div class="stat-row"><label>DEF <em>Fielding</em></label><input type="range" id="DEF" min="0" max="100" value="60" /><span id="DEFv" class="stat-val">60</span><div class="stat-bar"><div class="stat-fill" id="DEFbar" style="width:60%"></div></div></div>
+          <div class="stat-row"><label>ARM <em>Throwing</em></label><input type="range" id="ARM" min="0" max="100" value="55" /><span id="ARMv" class="stat-val">55</span><div class="stat-bar"><div class="stat-fill" id="ARMbar" style="width:55%"></div></div></div>
+          <div class="stat-row"><label>PIT <em>Pitching</em></label><input type="range" id="PIT" min="0" max="100" value="0" /><span id="PITv" class="stat-val">0</span><div class="stat-bar"><div class="stat-fill pit-fill" id="PITbar" style="width:0%"></div></div></div>
+          <div class="stat-row"><label>STM <em>Stamina</em></label><input type="range" id="STM" min="0" max="100" value="70" /><span id="STMv" class="stat-val">70</span><div class="stat-bar"><div class="stat-fill stm-fill" id="STMbar" style="width:70%"></div></div></div>
+        </div>
+
+        <div class="check-row">
+          <label class="checkbox-label"><input id="isPitcher" type="checkbox" /> Mark as pitcher</label>
+          <label class="checkbox-label"><input id="isStar" type="checkbox" /> ⭐ Star Player</label>
+          <label class="checkbox-label"><input id="isCaptain" type="checkbox" /> 🦁 Team Captain</label>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnAddPlayer">+ Add Player</button>
+          <button class="btn btn-ghost" id="btnResetPlayerForm">Reset</button>
+        </div>
+      </div>
+
+      <!-- Right: Current Roster -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Current Roster</h2>
+          <div class="roster-meta" id="rosterMeta">No team selected</div>
+        </div>
+
+        <div class="btn-row">
+          <input class="search-input grow" id="rosterFilter" placeholder="🔍 Filter players…" />
+          <button class="btn btn-ghost sm" id="btnAutoLineup">Auto Lineup</button>
+          <button class="btn btn-ghost sm" id="btnShuffle">Shuffle</button>
+          <button class="btn btn-danger sm" id="btnClearRoster">Clear All</button>
+        </div>
+
+        <div id="rosterList" class="roster-list"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== GAME TAB ===== -->
+  <div class="tab-panel" id="tab-game">
+    <div class="game-layout">
+
+      <!-- Left: Controls & Scoreboard -->
+      <div class="game-left">
+        <div class="card">
+          <h2>Match Setup</h2>
+          <div class="matchup-row">
+            <div class="team-picker home-picker">
+              <div class="picker-label">🏠 Home</div>
+              <select id="homeTeamSelect"></select>
+            </div>
+            <div class="vs-badge">VS</div>
+            <div class="team-picker away-picker">
+              <div class="picker-label">✈️ Away</div>
+              <select id="awayTeamSelect"></select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btnNewGame">▶ Play Ball!</button>
+            <button class="btn btn-ghost sm" id="btnSwapTeams">⇄ Swap</button>
+          </div>
+        </div>
+
+        <!-- Scoreboard -->
+        <div class="card scoreboard-card">
+          <div class="scoreboard">
+            <div class="score-team home-score">
+              <img id="scoreLogoHome" class="score-logo" alt="" />
+              <div class="score-name" id="scoreNameHome">Home</div>
+              <div class="score-num" id="scoreNumHome">0</div>
+            </div>
+            <div class="score-center">
+              <div class="inning-display" id="inningDisplay">PRE-GAME</div>
+              <div class="count-display" id="countDisplay">Balls: 0 · Strikes: 0 · Outs: 0</div>
+            </div>
+            <div class="score-team away-score">
+              <img id="scoreLogoAway" class="score-logo" alt="" />
+              <div class="score-name" id="scoreNameAway">Away</div>
+              <div class="score-num" id="scoreNumAway">0</div>
+            </div>
+          </div>
+
+          <!-- Baseball Diamond -->
+          <div class="diamond-wrap">
+            <svg class="diamond-svg" viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
+              <!-- Outfield grass -->
+              <ellipse cx="110" cy="110" rx="105" ry="90" fill="rgba(34,197,94,0.07)" stroke="rgba(34,197,94,0.15)" stroke-width="1"/>
+              <!-- Infield dirt -->
+              <polygon points="110,25 185,100 110,175 35,100" fill="rgba(180,120,60,0.12)" stroke="rgba(180,120,60,0.3)" stroke-width="1"/>
+              <!-- Baselines -->
+              <line x1="110" y1="175" x2="185" y2="100" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+              <line x1="110" y1="175" x2="35" y2="100" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+              <line x1="35" y1="100" x2="110" y2="25" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+              <line x1="185" y1="100" x2="110" y2="25" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+              <!-- Pitcher's mound -->
+              <circle cx="110" cy="105" r="10" fill="rgba(180,120,60,0.25)" stroke="rgba(180,120,60,0.4)" stroke-width="1"/>
+              <!-- Home plate -->
+              <polygon id="base-home" points="110,185 118,178 118,172 102,172 102,178" fill="white" opacity="0.8"/>
+              <!-- 1st base -->
+              <rect id="base-1st" x="178" y="93" width="14" height="14" rx="2" fill="white" opacity="0.4"/>
+              <!-- 2nd base -->
+              <rect id="base-2nd" x="103" y="18" width="14" height="14" rx="2" fill="white" opacity="0.4"/>
+              <!-- 3rd base -->
+              <rect id="base-3rd" x="28" y="93" width="14" height="14" rx="2" fill="white" opacity="0.4"/>
+              <!-- Runners (hidden by default) -->
+              <circle id="runner-1st" cx="185" cy="100" r="7" fill="#f59e0b" stroke="white" stroke-width="2" display="none"/>
+              <circle id="runner-2nd" cx="110" cy="25" r="7" fill="#f59e0b" stroke="white" stroke-width="2" display="none"/>
+              <circle id="runner-3rd" cx="35" cy="100" r="7" fill="#f59e0b" stroke="white" stroke-width="2" display="none"/>
+              <!-- Batter indicator -->
+              <circle cx="110" cy="175" r="5" fill="rgba(59,130,246,0.6)" stroke="rgba(59,130,246,1)" stroke-width="1.5"/>
+            </svg>
+            <div class="base-labels">
+              <span class="base-label" style="right:0;top:50%">1st</span>
+              <span class="base-label" style="left:50%;top:0">2nd</span>
+              <span class="base-label" style="left:0;top:50%">3rd</span>
+            </div>
+          </div>
+
+          <div class="btn-row game-btns">
+            <button class="btn btn-primary" id="nextPlay">⚡ Next Play</button>
+            <button class="btn btn-ghost sm" id="simHalf">Skip Half-Inning</button>
+            <button class="btn btn-ghost sm" id="simGame">Sim Full Game</button>
+            <button class="btn btn-ghost sm" id="btnResetLog">Clear Log</button>
+          </div>
+        </div>
+
+        <!-- Pitcher matchup card -->
+        <div class="card" id="pitcherCard" style="display:none;">
+          <h3>On the Mound</h3>
+          <div class="matchup-pitchers">
+            <div class="pitcher-mini" id="pitcherHomeCard"></div>
+            <div class="pitcher-mini" id="pitcherAwayCard"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Highlight + Play Log -->
+      <div class="game-right">
+        <div class="card highlight-card" id="highlightCard">
+          <div class="highlight-img-wrap">
+            <img id="highlightImg" alt="" class="highlight-img" />
+            <div class="highlight-overlay" id="highlightOverlay"></div>
+            <div class="no-highlight" id="noHighlight">⚾ Start a game to see highlights!</div>
+          </div>
+          <div class="highlight-caption" id="highlightCaption">Play Ball!</div>
+          <div class="highlight-event-type" id="highlightType"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Play-by-Play</h2>
+            <div class="pbp-filter">
+              <label class="checkbox-label"><input id="filterHighlights" type="checkbox" /> Highlights only</label>
+            </div>
+          </div>
+          <div id="log" class="play-log"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== LEAGUE TAB ===== -->
+  <div class="tab-panel" id="tab-league">
+    <div class="card">
+      <div class="card-header">
+        <h2>League Browser — 300+ Teams</h2>
+        <div class="btn-row" style="margin:0">
+          <button class="btn btn-primary sm" id="btnGenTeams">🎲 Generate 300 Teams</button>
+          <button class="btn btn-ghost sm" id="btnGenClear">Clear Generated</button>
+        </div>
+      </div>
+
+      <div class="search-row">
+        <input class="search-input grow" id="leagueSearch" placeholder="🔍 Search leagues, cities, team names…" />
+        <select class="select-sm" id="leagueSort">
+          <option value="name">A–Z</option>
+          <option value="ovr">OVR ↓</option>
+          <option value="division">Division</option>
+        </select>
+        <select class="select-sm" id="leagueDivFilter">
+          <option value="">All Divisions</option>
+        </select>
+      </div>
+
+      <div id="leagueGrid" class="league-grid"></div>
+
+      <!-- Team detail modal overlay -->
+      <div id="leagueModal" class="modal-overlay hidden">
+        <div class="modal-box">
+          <button class="modal-close" id="leagueModalClose">✕</button>
+          <div id="leagueModalContent"></div>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btnChallengeLeague">⚾ Challenge This Team</button>
+            <button class="btn btn-ghost" id="btnImportLeague">Import to My Teams</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STATS TAB ===== -->
+  <div class="tab-panel" id="tab-stats">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <h2>Season Record</h2>
+          <select class="select-sm" id="statsTeamSelect"></select>
+        </div>
+
+        <div class="season-banner" id="seasonBanner">
+          <div class="record-circle">
+            <span id="seasonW">0</span>–<span id="seasonL">0</span>
+          </div>
+          <div class="season-info">
+            <div class="season-label">WIN RATE</div>
+            <div class="season-pct" id="seasonPct">—</div>
+            <div class="season-streak" id="seasonStreak"></div>
+          </div>
+        </div>
+
+        <h3>Game History</h3>
+        <div id="gameHistory" class="game-history"></div>
+      </div>
+
+      <div class="card">
+        <h2>Player Season Stats</h2>
+        <div class="table-wrap">
+          <table class="stat-table" id="playerStatTable">
+            <thead>
+              <tr>
+                <th>Player</th><th>POS</th><th>AB</th><th>H</th>
+                <th>HR</th><th>RBI</th><th>R</th><th>AVG</th>
+                <th>SB</th>
+              </tr>
+            </thead>
+            <tbody id="playerStatBody"></tbody>
+          </table>
+        </div>
+        <h3 style="margin-top:14px">Pitching Stats</h3>
+        <div class="table-wrap">
+          <table class="stat-table" id="pitcherStatTable">
+            <thead>
+              <tr>
+                <th>Pitcher</th><th>IP</th><th>K</th><th>BB</th><th>H</th><th>ERA</th>
+              </tr>
+            </thead>
+            <tbody id="pitcherStatBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  ⚾ Baseball Universe · All data saved in your browser · Export teams to back up
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
